@@ -44,10 +44,11 @@ class AuthProvider with ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _setError('Invalid email or password');
+        _setError('Login failed. Please check your credentials.');
         return false;
       }
     } catch (e) {
+      print('AuthProvider login error: $e');
       _setError(AuthService.getAuthErrorMessage(e));
       return false;
     } finally {

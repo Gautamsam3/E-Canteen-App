@@ -8,12 +8,14 @@ class MenuProvider with ChangeNotifier {
   List<MenuItem> _filteredItems = [];
   List<String> _categories = [];
   String _selectedCategory = 'All';
+  String _searchQuery = '';
   bool _isLoading = false;
   String? _errorMessage;
 
   List<MenuItem> get menuItems => _filteredItems;
   List<String> get categories => ['All', ..._categories];
   String get selectedCategory => _selectedCategory;
+  String get searchQuery => _searchQuery;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -38,25 +40,30 @@ class MenuProvider with ChangeNotifier {
 
   void selectCategory(String category) {
     _selectedCategory = category;
+    _searchQuery = ''; // Clear search when changing category
     _applyFilter();
   }
 
   Future<void> searchMenuItems(String query) async {
+    _searchQuery = query;
     if (query.isEmpty) {
-      _applyFilter();
+      _applyFilter(); // Reset to category filter when search is empty
       return;
     }
 
-    _setLoading(true);
-    try {
-      final searchResults = await MenuService.searchMenuItems(query);
-      _filteredItems = searchResults;
-      notifyListeners();
-    } catch (e) {
-      _setError('Search failed');
-    } finally {
-      _setLoading(false);
-    }
+    // Search within the current category filter if not 'All'
+    List<MenuItem> searchPool = _selectedCategory == 'All' 
+        ? _menuItems 
+        : _menuItems.where((item) => item.category == _selectedCategory).toList();
+
+    // Filter search pool by query
+    _filteredItems = searchPool
+        .where((item) =>
+            item.name.toLowerCase().contains(query.toLowerCase()) ||
+            item.description.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+    
+    notifyListeners();
   }
 
   MenuItem? getMenuItemById(String id) {

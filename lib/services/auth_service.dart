@@ -23,13 +23,20 @@ class AuthService {
   // Register new user
   static Future<bool> register(String name, String email, String password, String phone) async {
     try {
+      print('Attempting registration with email: $email');
+      
+      final trimmedEmail = email.trim().toLowerCase();
+      final trimmedPassword = password.trim();
+      final trimmedName = name.trim();
+      final trimmedPhone = phone.trim();
+      
       // First, try to sign up the user
       final response = await _supabase.auth.signUp(
-        email: email,
-        password: password,
+        email: trimmedEmail,
+        password: trimmedPassword,
         data: {
-          'name': name,
-          'phone': phone,
+          'name': trimmedName,
+          'phone': trimmedPhone,
         },
         emailRedirectTo: null, // Disable email redirect for now
       );
@@ -46,9 +53,9 @@ class AuthService {
           // Try to create user profile in database
           await _supabase.from('profiles').upsert({
             'id': response.user!.id,
-            'name': name,
-            'email': email,
-            'phone': phone,
+            'name': trimmedName,
+            'email': trimmedEmail,
+            'phone': trimmedPhone,
             'created_at': DateTime.now().toIso8601String(),
           });
           print('Profile created successfully');
@@ -95,14 +102,23 @@ class AuthService {
   // Login with email and password
   static Future<bool> login(String email, String password) async {
     try {
+      print('Attempting login with email: $email');
+      
+      // Trim whitespace and convert email to lowercase
+      final trimmedEmail = email.trim().toLowerCase();
+      final trimmedPassword = password.trim();
+      
       final response = await _supabase.auth.signInWithPassword(
-        email: email,
-        password: password,
+        email: trimmedEmail,
+        password: trimmedPassword,
       );
+      
+      print('Login response: ${response.user?.id}');
       return response.user != null;
     } catch (e) {
-      print('Login error: $e');
-      return false;
+      print('Login error details: $e');
+      print('Error type: ${e.runtimeType}');
+      rethrow; // Re-throw to let AuthProvider handle the error message
     }
   }
 
@@ -142,27 +158,35 @@ class AuthService {
   // Get error message from Supabase error
   static String getAuthErrorMessage(dynamic error) {
     final errorMessage = error.toString().toLowerCase();
+    print('Processing error message: $errorMessage');
     
     if (errorMessage.contains('over_email_send_rate_limit')) {
       return 'Too many requests. Please wait a moment before trying again.';
-    } else if (errorMessage.contains('invalid login credentials')) {
-      return 'Invalid email or password';
+    } else if (errorMessage.contains('invalid login credentials') || 
+               errorMessage.contains('invalid_grant')) {
+      return 'Invalid email or password. Please check your credentials.';
     } else if (errorMessage.contains('email not confirmed')) {
-      return 'Please check your email and confirm your account';
+      return 'Please check your email and confirm your account before logging in.';
+    } else if (errorMessage.contains('user not found')) {
+      return 'No account found with this email. Please register first.';
     } else if (errorMessage.contains('user already registered')) {
-      return 'An account with this email already exists';
+      return 'An account with this email already exists. Please login instead.';
     } else if (errorMessage.contains('password should be at least')) {
       return 'Password should be at least 6 characters';
     } else if (errorMessage.contains('invalid email')) {
       return 'Please enter a valid email address';
     } else if (errorMessage.contains('signup is disabled')) {
       return 'New registrations are currently disabled';
-    } else if (errorMessage.contains('404')) {
-      return 'Database not configured properly. Please contact support.';
-    } else if (errorMessage.contains('rate limit')) {
+    } else if (errorMessage.contains('too_many_requests') || 
+               errorMessage.contains('rate limit')) {
       return 'Too many attempts. Please wait before trying again.';
+    } else if (errorMessage.contains('network') || 
+               errorMessage.contains('connection')) {
+      return 'Network error. Please check your internet connection.';
+    } else if (errorMessage.contains('404')) {
+      return 'Service not available. Please contact support.';
     }
     
-    return 'Authentication failed. Please try again.';
+    return 'Authentication failed. Please try again or contact support.';
   }
 }

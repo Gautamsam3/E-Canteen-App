@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import '../utils/image_validator.dart';
 
 class SafeNetworkImage extends StatefulWidget {
-  final String imageUrl;
+  final String imagePath;
   final double? width;
   final double? height;
   final BoxFit fit;
-  final String? fallbackImageUrl;
+  final String? fallbackImagePath;
   final Widget? placeholder;
   final Widget? errorWidget;
 
   const SafeNetworkImage({
     Key? key,
-    required this.imageUrl,
+    required this.imagePath,
     this.width,
     this.height,
     this.fit = BoxFit.cover,
-    this.fallbackImageUrl,
+    this.fallbackImagePath,
     this.placeholder,
     this.errorWidget,
   }) : super(key: key);
@@ -26,25 +26,25 @@ class SafeNetworkImage extends StatefulWidget {
 }
 
 class _SafeNetworkImageState extends State<SafeNetworkImage> {
-  late String _currentImageUrl;
+  late String _currentImagePath;
   bool _hasError = false;
 
   @override
   void initState() {
     super.initState();
-    _currentImageUrl = ImageValidator.getValidImageUrlOrDefault(
-      widget.imageUrl,
-      widget.fallbackImageUrl,
+    _currentImagePath = ImageValidator.getValidImageUrlOrDefault(
+      widget.imagePath,
+      widget.fallbackImagePath,
     );
   }
 
   @override
   void didUpdateWidget(SafeNetworkImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.imageUrl != widget.imageUrl) {
-      _currentImageUrl = ImageValidator.getValidImageUrlOrDefault(
-        widget.imageUrl,
-        widget.fallbackImageUrl,
+    if (oldWidget.imagePath != widget.imagePath) {
+      _currentImagePath = ImageValidator.getValidImageUrlOrDefault(
+        widget.imagePath,
+        widget.fallbackImagePath,
       );
       _hasError = false;
     }
@@ -95,39 +95,67 @@ class _SafeNetworkImageState extends State<SafeNetworkImage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!ImageValidator.isValidImageUrl(_currentImageUrl)) {
+    if (!ImageValidator.isValidImageUrl(_currentImagePath)) {
       return _buildErrorWidget();
     }
 
-    return Image.network(
-      _currentImageUrl,
-      width: widget.width,
-      height: widget.height,
-      fit: widget.fit,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return _buildPlaceholder();
-      },
-      errorBuilder: (context, error, stackTrace) {
-        // Try fallback image if available and not already tried
-        if (!_hasError && 
-            widget.fallbackImageUrl != null && 
-            widget.fallbackImageUrl != _currentImageUrl &&
-            ImageValidator.isValidImageUrl(widget.fallbackImageUrl)) {
+    if (_currentImagePath.startsWith('assets/')) {
+      return Image.asset(
+        _currentImagePath,
+        width: widget.width,
+        height: widget.height,
+        fit: widget.fit,
+        errorBuilder: (context, error, stackTrace) {
+          if (!_hasError && 
+              widget.fallbackImagePath != null && 
+              widget.fallbackImagePath != _currentImagePath &&
+              ImageValidator.isValidImageUrl(widget.fallbackImagePath)) {
+            
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() {
+                  _currentImagePath = widget.fallbackImagePath!;
+                  _hasError = true;
+                });
+              }
+            });
+            return _buildPlaceholder();
+          }
           
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              setState(() {
-                _currentImageUrl = widget.fallbackImageUrl!;
-                _hasError = true;
-              });
-            }
-          });
+          return _buildErrorWidget();
+        },
+      );
+    } else {
+      return Image.network(
+        _currentImagePath,
+        width: widget.width,
+        height: widget.height,
+        fit: widget.fit,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
           return _buildPlaceholder();
-        }
-        
-        return _buildErrorWidget();
-      },
-    );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          // Try fallback image if available and not already tried
+          if (!_hasError && 
+              widget.fallbackImagePath != null && 
+              widget.fallbackImagePath != _currentImagePath &&
+              ImageValidator.isValidImageUrl(widget.fallbackImagePath)) {
+            
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() {
+                  _currentImagePath = widget.fallbackImagePath!;
+                  _hasError = true;
+                });
+              }
+            });
+            return _buildPlaceholder();
+          }
+          
+          return _buildErrorWidget();
+        },
+      );
+    }
   }
 }
