@@ -69,6 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isAdmin = Provider.of<AuthProvider>(context).isAdmin;
     return Scaffold(
       appBar: AppBar(
         title: const Text('E-Canteen'),
@@ -80,16 +81,22 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: _screens[_selectedIndex],
+      body: [
+        const MenuScreen(),
+        const CartScreen(),
+        const OrderHistoryScreen(),
+        if (isAdmin) const AdminScreen(),
+      ][_selectedIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: _onItemTapped,
-        destinations: _navItems
-            .map((item) => NavigationDestination(
-                  icon: item.icon!,
-                  label: item.label!,
-                ))
-            .toList(),
+        destinations: [
+          const NavigationDestination(icon: Icon(Icons.restaurant_menu), label: 'Menu'),
+          const NavigationDestination(icon: Icon(Icons.shopping_cart), label: 'Cart'),
+          const NavigationDestination(icon: Icon(Icons.history), label: 'Orders'),
+          if (isAdmin)
+            const NavigationDestination(icon: Icon(Icons.admin_panel_settings), label: 'Admin'),
+        ],
         height: 70,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
       ),
