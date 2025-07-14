@@ -41,4 +41,26 @@ class OrderService {
     }
     return result;
   }
+
+  Future<List<OrderModel>> fetchAllOrders() async {
+    final orders = await _client.from('orders').select().order('created_at', ascending: false);
+    List<OrderModel> result = [];
+    for (final order in orders) {
+      final orderItems = await _client.from('order_items').select('*,menu_items(name,image_url)').eq('order_id', order['id']);
+      final items = orderItems.map<OrderItemModel>((item) => OrderItemModel(
+        id: item['id'] as String,
+        menuItemId: item['menu_item_id'] as String,
+        quantity: item['quantity'] as int,
+        price: (item['price'] as num).toDouble(),
+        name: item['menu_items']['name'] as String? ?? '',
+        imageUrl: item['menu_items']['image_url'] as String? ?? '',
+      )).toList();
+      result.add(OrderModel.fromMap(order, items));
+    }
+    return result;
+  }
+
+  Future<void> updateOrderStatus(String orderId, String status) async {
+    await _client.from('orders').update({'status': status}).eq('id', orderId);
+  }
 } 

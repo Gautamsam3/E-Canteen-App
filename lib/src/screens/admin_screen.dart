@@ -5,6 +5,8 @@ import '../providers/menu_provider.dart';
 import '../services/menu_service.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import '../models/order_model.dart';
+import '../services/order_service.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
@@ -13,16 +15,44 @@ class AdminScreen extends StatefulWidget {
   State<AdminScreen> createState() => _AdminScreenState();
 }
 
-class _AdminScreenState extends State<AdminScreen> {
+class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStateMixin {
   late MenuService _menuService;
+  late OrderService _orderService;
+  late TabController _tabController;
+  List<OrderModel> _allOrders = [];
+  bool _loadingOrders = false;
+  String? _orderError;
 
   @override
   void initState() {
     super.initState();
     _menuService = MenuService();
+    _orderService = OrderService();
+    _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<MenuProvider>(context, listen: false).loadMenu();
+      _loadAllOrders();
     });
+  }
+
+  Future<void> _loadAllOrders() async {
+    setState(() {
+      _loadingOrders = true;
+      _orderError = null;
+    });
+    try {
+      _allOrders = await _orderService.fetchAllOrders();
+    } catch (e) {
+      _orderError = e.toString();
+    }
+    setState(() {
+      _loadingOrders = false;
+    });
+  }
+
+  Future<void> _updateOrderStatus(String orderId, String status) async {
+    await _orderService.updateOrderStatus(orderId, status);
+    await _loadAllOrders();
   }
 
   void _showMenuItemForm({MenuItem? item}) async {
@@ -152,47 +182,131 @@ class _AdminScreenState extends State<AdminScreen> {
     final menuProvider = Provider.of<MenuProvider>(context);
     final items = menuProvider.items;
     return Scaffold(
-      appBar: AppBar(title: const Text('Admin Menu Management')),
-      body: items.isEmpty
-          ? const Center(child: Text('No menu items.'))
-          : ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return Card(
-                  child: ListTile(
-                    leading: item.imageUrl.isNotEmpty
-                        ? Image.network(item.imageUrl, width: 48, height: 48, fit: BoxFit.cover)
-                        : const Icon(Icons.fastfood, size: 32),
-                    title: Text(item.name),
-                    subtitle: Text('₹${item.price.toStringAsFixed(2)} | ${item.category}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () => _showMenuItemForm(item: item),
+      appBar: AppBar(
+        title: const Text('Admin Panel'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Menu'),
+            Tab(text: 'Orders'),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          // Menu Management
+          items.isEmpty
+              ? const Center(child: Text('No menu items.'))
+              : ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: items.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final item = items[index];
+                    return Card(
+                      child: ListTile(
+                        leading: item.imageUrl.isNotEmpty
+                            ? Image.network(item.imageUrl, width: 48, height: 48, fit: BoxFit.cover)
+                            : const Icon(Icons.fastfood, size: 32),
+                        title: Text(item.name),
+                        subtitle: Text('₹${item.price.toStringAsFixed(2)} | ${item.category}'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () => _showMenuItemForm(item: item),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete),
+                              onPressed: () async {
+                                await _menuService.deleteMenuItem(item.id);
+                                if (mounted) Provider.of<MenuProvider>(context, listen: false).loadMenu();
+                              },
+                            ),
+                          ],
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
-                          onPressed: () async {
-                            await _menuService.deleteMenuItem(item.id);
-                            if (mounted) Provider.of<MenuProvider>(context, listen: false).loadMenu();
+                      ),
+                    );
+                  },
+                ),
+          // Order Management
+          _loadingOrders
+              ? const Center(child: CircularProgressIndicator())
+              : _orderError != null
+                  ? Center(child: Text('Error: $_orderError', style: TextStyle(color: Colors.red)))
+                  : _allOrders.isEmpty
+                      ? const Center(child: Text('No orders yet.'))
+                      : ListView.separated(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _allOrders.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: 16),
+                          itemBuilder: (context, index) {
+                            final order = _allOrders[index];
+                            return Card(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 3,
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text('Order #${order.id.substring(0, 8)}', style: Theme.of(context).textTheme.titleMedium),
+                                        DropdownButton<String>(
+                                          value: order.status,
+                                          items: const [
+                                            DropdownMenuItem(value: 'pending', child: Text('Pending')),
+                                            DropdownMenuItem(value: 'completed', child: Text('Completed')),
+                                            DropdownMenuItem(value: 'cancelled', child: Text('Cancelled')),
+                                          ],
+                                          onChanged: (val) {
+                                            if (val != null && val != order.status) {
+                                              _updateOrderStatus(order.id, val);
+                                            }
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text('Placed on: ${order.createdAt.toLocal().toString().substring(0, 16)}'),
+                                    const SizedBox(height: 8),
+                                    ...order.items.map((item) => Row(
+                                          children: [
+                                            ClipRRect(
+                                              borderRadius: BorderRadius.circular(6),
+                                              child: item.imageUrl.isNotEmpty
+                                                  ? Image.network(item.imageUrl, width: 36, height: 36, fit: BoxFit.cover)
+                                                  : const Icon(Icons.fastfood, size: 24),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(child: Text(item.name)),
+                                            Text('x${item.quantity}'),
+                                            const SizedBox(width: 8),
+                                            Text('₹${item.price.toStringAsFixed(2)}'),
+                                          ],
+                                        )),
+                                    const SizedBox(height: 8),
+                                    Text('Total: ₹${order.items.fold(0, (sum, item) => sum + item.price * item.quantity).toStringAsFixed(2)}',
+                                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                              ),
+                            );
                           },
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showMenuItemForm(),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Item'),
+        ],
       ),
+      floatingActionButton: _tabController.index == 0
+          ? FloatingActionButton.extended(
+              onPressed: () => _showMenuItemForm(),
+              icon: const Icon(Icons.add),
+              label: const Text('Add Item'),
+            )
+          : null,
     );
   }
 } 

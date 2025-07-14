@@ -54,6 +54,21 @@ class AuthGate extends StatelessWidget {
         if (session == null) {
           return LoginScreen();
         } else {
+          // Listen for order status changes
+          final userId = session.user.id;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Provider.of<OrderProvider>(context, listen: false).listenForOrderStatus(userId);
+          });
+          // Show notification if any
+          final orderProvider = Provider.of<OrderProvider>(context);
+          if (orderProvider.lastStatusChange != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(orderProvider.lastStatusChange!)),
+              );
+              orderProvider.clearStatusNotification();
+            });
+          }
           return HomeScreen();
         }
       },
