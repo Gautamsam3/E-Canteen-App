@@ -114,7 +114,7 @@ lib/
 This project has a solid foundation, but there's always room for more! Here are some features planned for the future:
 
 * [ ] **Menu Search:** A search bar to quickly find specific food items.
-* [ ] **Real-Time Order Tracking:** See the status of your order live (e.g., "Preparing," "Out for Delivery").
+* [ ] **Real-Time Order Tracking:** See the status of your order live (e.g., "Preparing," "On Counter").
 * [ ] **User Profile Pictures:** Allow users to upload their own profile photos.
 * [ ] **Ratings & Reviews:** Let users rate and review food items.
 * [ ] **Payment Gateway Integration:** Add support for online payments.
