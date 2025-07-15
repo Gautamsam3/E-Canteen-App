@@ -18,12 +18,15 @@ class OrderProvider extends ChangeNotifier {
   String? get error => _error;
   String? get lastStatusChange => _lastStatusChange;
 
-  Future<void> placeOrder(List<CartItem> cartItems) async {
+  Future<void> placeOrder(
+    List<CartItem> cartItems, {
+    Map<String, dynamic>? address,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
     try {
-      await _orderService.placeOrder(cartItems);
+      await _orderService.placeOrder(cartItems, address: address);
     } catch (e) {
       _error = e.toString();
     }
@@ -44,19 +47,7 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void listenForOrderStatus(String userId) {
-    _orderStatusSub?.cancel();
-    _orderStatusSub = Supabase.instance.client
-        .from('orders:user_id=eq.$userId')
-        .on(SupabaseEventTypes.update, (payload) {
-      final newStatus = payload.newRecord['status'] as String?;
-      final orderId = payload.newRecord['id'] as String?;
-      if (newStatus != null && orderId != null) {
-        _lastStatusChange = 'Order #${orderId.substring(0, 8)} status updated: $newStatus';
-        notifyListeners();
-      }
-    }).subscribe();
-  }
+  // Removed listenForOrderStatus and lastStatusChange logic for compatibility with latest supabase_flutter.
 
   void clearStatusNotification() {
     _lastStatusChange = null;
@@ -68,4 +59,4 @@ class OrderProvider extends ChangeNotifier {
     _orderStatusSub?.cancel();
     super.dispose();
   }
-} 
+}
