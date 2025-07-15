@@ -26,14 +26,12 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text.trim(),
       );
       if (!success) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Login failed. Please check your credentials.')),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Login failed. Please check your credentials.')),
+        );
       }
-      // The auth wrapper will handle navigation.
+      // The auth wrapper will handle navigation
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -117,39 +115,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: const Text('Login'),
                         ),
                 ),
-                const SizedBox(height: 16),
-                FadeInUp(
-                  delay: const Duration(milliseconds: 650),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        if (_emailController.text.isNotEmpty) {
-                          Provider.of<AuthProvider>(context, listen: false)
-                              .resetPassword(_emailController.text.trim());
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Password reset email sent. Check your inbox.')),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Please enter your email to reset password.')),
-                          );
-                        }
-                      },
-                      child: const Text('Forgot Password?'),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 24),
                 FadeInUp(
                   delay: const Duration(milliseconds: 700),
                   child: OutlinedButton.icon(
                       onPressed: () => _loginWithGoogle(context),
-                      icon: Image.asset('assets/google_logo.png', height: 24),
+                      icon: Image.asset(
+                        'assets/google_logo.png',
+                        height: 24,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(Icons.g_mobiledata, size: 24);
+                        },
+                      ),
                       label: const Text('Sign in with Google')),
                 ),
                 const SizedBox(height: 24),

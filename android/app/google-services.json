@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "44458691194",
+    "project_id": "nomnom-20e45",
+    "storage_bucket": "nomnom-20e45.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44458691194:android:26dd8dd822c6cc329149c3",
+        "android_client_info": {
+          "package_name": "com.nomnom.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "44458691194-qhtagi6lcngqm11r17ornqeemr56f31n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nomnom.app",
+            "certificate_hash": "c74653a50f68e0cc126447733ef00d684d39fc0b"
+          }
+        },
+        {
+          "client_id": "44458691194-l23o2fp0dm02jemnq6kltaom5oq0v4ot.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBh9EJVlOmeUfqsjOzHvKgYSlECxBxrLEo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "44458691194-l23o2fp0dm02jemnq6kltaom5oq0v4ot.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

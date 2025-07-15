@@ -20,19 +20,39 @@ The E-Canteen app lets users:
 
 ```
 lib/
-├── main.dart                     # Entry point
+├── main.dart
+├── providers/
+│   ├── auth_provider.dart
+│   ├── cart_provider.dart
+│   └── theme_provider.dart
 ├── models/
-│   └── menu_item.dart            # Menu item data model
-├── state/
-│   └── app_state.dart            # Simple app-wide state
+│   ├── cart_item_model.dart
+│   ├── category_model.dart
+│   ├── menu_item_model.dart
+│   ├── order_model.dart
+│   └── user_model.dart
+├── services/
+│   └── firestore_service.dart
 ├── screens/
-│   ├── login_screen.dart         # Login UI
-│   ├── home_screen.dart          # Bottom nav + routing
-│   ├── menu_screen.dart          # Food menu
-│   ├── cart_screen.dart          # Cart view & checkout
-│   └── order_history_screen.dart # Order history
-├── widgets/
-│   └── cart_badge.dart           #reusable cart badge
+│   ├── auth/
+│   │   ├── login_screen.dart
+│   │   └── signup_screen.dart
+│   ├── main/
+│   │   ├── home_screen.dart
+│   │   ├── cart_screen.dart
+│   │   └── profile_screen.dart
+│   ├── menu/
+│   │   ├── menu_home_screen.dart
+│   │   └── category_items_screen.dart
+│   └── splash_screen.dart
+├── utils/
+│   └── app_theme.dart
+└── widgets/
+    ├── cart_badge.dart
+    ├── category_tile.dart
+    ├── menu_item_card.dart
+    └── quantity_stepper.dart
+
 ```
 
 ---

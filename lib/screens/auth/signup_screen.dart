@@ -1,51 +1,43 @@
 import 'package:nomnom/providers/auth_provider.dart';
-import 'package:nomnom/screens/auth/signup_screen.dart';
+import 'package:nomnom/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
-  void _login(BuildContext context) async {
+  void _signUp(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final success = await authProvider.signIn(
+      final success = await authProvider.signUp(
         _emailController.text.trim(),
         _passwordController.text.trim(),
+        _nameController.text.trim(),
       );
       if (!success) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Login failed. Please check your credentials.')),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content:
+                  Text('Sign up failed. The email might already be in use.')),
+        );
       }
-      // The auth wrapper will handle navigation.
+      // Auth wrapper will handle navigation
       if (mounted) {
         setState(() => _isLoading = false);
       }
-    }
-  }
-
-  void _loginWithGoogle(BuildContext context) async {
-    setState(() => _isLoading = true);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider.signInWithGoogle();
-    if (mounted) {
-      setState(() => _isLoading = false);
     }
   }
 
@@ -63,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 FadeInDown(
                   child: Text(
-                    'Welcome Back!',
+                    'Create Account',
                     style: Theme.of(context)
                         .textTheme
                         .headlineMedium
@@ -75,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 FadeInDown(
                   delay: const Duration(milliseconds: 200),
                   child: Text(
-                    'Log in to continue your feast',
+                    'Start your culinary journey with us',
                     style: Theme.of(context).textTheme.titleMedium,
                     textAlign: TextAlign.center,
                   ),
@@ -83,6 +75,18 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 48),
                 FadeInUp(
                   delay: const Duration(milliseconds: 400),
+                  child: TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                        labelText: 'Full Name', border: OutlineInputBorder()),
+                    validator: (value) => (value == null || value.isEmpty)
+                        ? 'Please enter your name'
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FadeInUp(
+                  delay: const Duration(milliseconds: 500),
                   child: TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(
@@ -96,7 +100,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
                 FadeInUp(
-                  delay: const Duration(milliseconds: 500),
+                  delay: const Duration(milliseconds: 600),
                   child: TextFormField(
                     controller: _passwordController,
                     decoration: const InputDecoration(
@@ -109,48 +113,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 32),
                 FadeInUp(
-                  delay: const Duration(milliseconds: 600),
+                  delay: const Duration(milliseconds: 700),
                   child: _isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : ElevatedButton(
-                          onPressed: () => _login(context),
-                          child: const Text('Login'),
+                          onPressed: () => _signUp(context),
+                          child: const Text('Sign Up'),
                         ),
-                ),
-                const SizedBox(height: 16),
-                FadeInUp(
-                  delay: const Duration(milliseconds: 650),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {
-                        if (_emailController.text.isNotEmpty) {
-                          Provider.of<AuthProvider>(context, listen: false)
-                              .resetPassword(_emailController.text.trim());
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Password reset email sent. Check your inbox.')),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Please enter your email to reset password.')),
-                          );
-                        }
-                      },
-                      child: const Text('Forgot Password?'),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                FadeInUp(
-                  delay: const Duration(milliseconds: 700),
-                  child: OutlinedButton.icon(
-                      onPressed: () => _loginWithGoogle(context),
-                      icon: Image.asset('assets/google_logo.png', height: 24),
-                      label: const Text('Sign in with Google')),
                 ),
                 const SizedBox(height: 24),
                 FadeInUp(
@@ -158,13 +127,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Don't have an account?"),
+                      const Text("Already have an account?"),
                       TextButton(
                         onPressed: () => Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (_) => const SignUpScreen())),
-                        child: const Text('Sign Up'),
+                                builder: (_) => const LoginScreen())),
+                        child: const Text('Login'),
                       ),
                     ],
                   ),
