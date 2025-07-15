@@ -328,230 +328,152 @@ class _AdminScreenState extends State<AdminScreen>
                             index,
                           ) {
                             final item = menuProvider.items[index];
-                            return StatefulBuilder(
-                              builder: (context, setStateCard) {
-                                bool cardPressed = false;
-                                return GestureDetector(
-                                  onTapDown:
-                                      (_) => setStateCard(
-                                        () => cardPressed = true,
+                            return Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              elevation: 4,
+                              clipBehavior: Clip.antiAlias,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  // Image (top 60%)
+                                  Container(
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(18),
                                       ),
-                                  onTapUp:
-                                      (_) => setStateCard(
-                                        () => cardPressed = false,
-                                      ),
-                                  onTapCancel:
-                                      () => setStateCard(
-                                        () => cardPressed = false,
-                                      ),
-                                  child: AnimatedScale(
-                                    scale: cardPressed ? 0.97 : 1.0,
-                                    duration: const Duration(milliseconds: 100),
-                                    child: Card(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      elevation: 3,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          AspectRatio(
-                                            aspectRatio: 1.2,
-                                            child: ClipRRect(
-                                              borderRadius:
-                                                  const BorderRadius.vertical(
-                                                    top: Radius.circular(16),
-                                                  ),
-                                              child:
-                                                  item.imageUrl.isNotEmpty
-                                                      ? Image.network(
-                                                        item.imageUrl,
-                                                        fit: BoxFit.cover,
-                                                        errorBuilder:
-                                                            (
-                                                              context,
-                                                              error,
-                                                              stackTrace,
-                                                            ) => Container(
-                                                              color: Colors
-                                                                  .deepOrange
-                                                                  .withOpacity(
-                                                                    0.10,
-                                                                  ),
-                                                              child: const Icon(
-                                                                Icons.fastfood,
-                                                                size: 36,
-                                                                color:
-                                                                    Colors
-                                                                        .deepOrange,
-                                                              ),
-                                                            ),
-                                                      )
-                                                      : Container(
-                                                        color: Colors.deepOrange
-                                                            .withOpacity(0.10),
-                                                        child: const Icon(
-                                                          Icons.fastfood,
-                                                          size: 36,
-                                                          color:
-                                                              Colors.deepOrange,
-                                                        ),
-                                                      ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 2,
-                                                  ),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    item.name,
-                                                    style: Theme.of(context)
-                                                        .textTheme
-                                                        .titleMedium
-                                                        ?.copyWith(
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.black87,
-                                                        ),
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                  const SizedBox(height: 1),
-                                                  Row(
-                                                    children: [
-                                                      Container(
-                                                        padding:
-                                                            const EdgeInsets.symmetric(
-                                                              horizontal: 6,
-                                                              vertical: 2,
-                                                            ),
-                                                        decoration: BoxDecoration(
-                                                          color: Colors
-                                                              .deepOrange
-                                                              .withOpacity(
-                                                                0.12,
-                                                              ),
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                6,
-                                                              ),
-                                                        ),
-                                                        child: Text(
-                                                          item.category,
-                                                          style: Theme.of(
-                                                                context,
-                                                              )
-                                                              .textTheme
-                                                              .labelSmall
-                                                              ?.copyWith(
-                                                                color:
-                                                                    Colors
-                                                                        .deepOrange,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                                fontSize: 11,
-                                                              ),
-                                                          maxLines: 1,
-                                                          overflow:
-                                                              TextOverflow
-                                                                  .ellipsis,
-                                                        ),
-                                                      ),
-                                                      const Spacer(),
-                                                      Text(
-                                                        '₹${item.price.toStringAsFixed(2)}',
-                                                        style: Theme.of(context)
-                                                            .textTheme
-                                                            .titleSmall
-                                                            ?.copyWith(
-                                                              color:
-                                                                  Colors
-                                                                      .deepOrange,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 2),
-                                                  Flexible(
-                                                    child: Text(
-                                                      item.description,
-                                                      maxLines: 2,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: Theme.of(context)
-                                                          .textTheme
-                                                          .bodySmall
-                                                          ?.copyWith(
-                                                            fontSize: 12,
-                                                            color:
-                                                                Colors.black54,
-                                                          ),
+                                      color: Colors.grey[200],
+                                    ),
+                                    clipBehavior: Clip.antiAlias,
+                                    child:
+                                        item.imageUrl.isNotEmpty
+                                            ? Image.network(
+                                              item.imageUrl,
+                                              fit: BoxFit.cover,
+                                              width: double.infinity,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => Center(
+                                                    child: Icon(
+                                                      Icons.fastfood,
+                                                      color: Colors.deepOrange,
+                                                      size: 36,
                                                     ),
                                                   ),
-                                                  const SizedBox(height: 4),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.end,
-                                                    children: [
-                                                      IconButton(
-                                                        icon: const Icon(
-                                                          Icons.edit,
-                                                          size: 18,
+                                            )
+                                            : Center(
+                                              child: Icon(
+                                                Icons.fastfood,
+                                                color: Colors.deepOrange,
+                                                size: 36,
+                                              ),
+                                            ),
+                                  ),
+                                  // Content (bottom 40%)
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        14,
+                                        10,
+                                        14,
+                                        10,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleMedium?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 17,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            item.category +
+                                                (item.description.isNotEmpty
+                                                    ? ', ${item.description}'
+                                                    : ''),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.bodySmall?.copyWith(
+                                              color: Colors.grey[700],
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                '₹${item.price.toStringAsFixed(2)}',
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleSmall
+                                                    ?.copyWith(
+                                                      color: Colors.deepOrange,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.edit,
+                                                      size: 18,
+                                                    ),
+                                                    onPressed:
+                                                        () => _showMenuItemForm(
+                                                          item: item,
                                                         ),
-                                                        onPressed:
-                                                            () =>
-                                                                _showMenuItemForm(
-                                                                  item: item,
-                                                                ),
-                                                        tooltip: 'Edit',
-                                                        splashRadius: 18,
-                                                      ),
-                                                      IconButton(
-                                                        icon: const Icon(
-                                                          Icons.delete,
-                                                          size: 18,
-                                                        ),
-                                                        onPressed: () async {
-                                                          await _menuService
-                                                              .deleteMenuItem(
-                                                                item.id,
-                                                              );
-                                                          if (mounted)
-                                                            Provider.of<
-                                                              MenuProvider
-                                                            >(
-                                                              context,
-                                                              listen: false,
-                                                            ).loadMenu();
-                                                        },
-                                                        tooltip: 'Delete',
-                                                        splashRadius: 18,
-                                                      ),
-                                                    ],
+                                                    tooltip: 'Edit',
+                                                    splashRadius: 18,
+                                                  ),
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.delete,
+                                                      size: 18,
+                                                    ),
+                                                    onPressed: () async {
+                                                      await _menuService
+                                                          .deleteMenuItem(
+                                                            item.id,
+                                                          );
+                                                      if (mounted)
+                                                        Provider.of<
+                                                          MenuProvider
+                                                        >(
+                                                          context,
+                                                          listen: false,
+                                                        ).loadMenu();
+                                                    },
+                                                    tooltip: 'Delete',
+                                                    splashRadius: 18,
                                                   ),
                                                 ],
                                               ),
-                                            ),
+                                            ],
                                           ),
                                         ],
                                       ),
                                     ),
                                   ),
-                                );
-                              },
+                                ],
+                              ),
                             );
                           }, childCount: menuProvider.items.length),
                           gridDelegate:
@@ -559,7 +481,7 @@ class _AdminScreenState extends State<AdminScreen>
                                 crossAxisCount: crossAxisCount,
                                 mainAxisSpacing: 14,
                                 crossAxisSpacing: 14,
-                                mainAxisExtent: 250,
+                                mainAxisExtent: 240,
                               ),
                         ),
                       ),

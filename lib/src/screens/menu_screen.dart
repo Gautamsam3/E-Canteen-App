@@ -93,6 +93,7 @@ class _MenuScreenState extends State<MenuScreen> {
 
     int crossAxisCount = 1;
     double width = MediaQuery.of(context).size.width;
+    double cardAspectRatio = 1.35;
     if (width >= 1400) {
       crossAxisCount = 4;
     } else if (width >= 1100) {
@@ -189,7 +190,7 @@ class _MenuScreenState extends State<MenuScreen> {
               crossAxisCount: crossAxisCount,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 0.75,
+              childAspectRatio: cardAspectRatio,
             ),
             itemBuilder:
                 (context, index) => MenuItemCard(item: filteredItems[index]),
@@ -207,123 +208,165 @@ class MenuItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 120,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(12),
-                ),
-                child:
-                    item.imageUrl.isNotEmpty
-                        ? Image.network(
-                          item.imageUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder:
-                              (context, error, stackTrace) => Container(
-                                color: Colors.grey[200],
-                                child: const Icon(
-                                  Icons.fastfood,
-                                  color: Colors.deepOrange,
-                                  size: 36,
-                                ),
-                              ),
-                        )
-                        : Container(
-                          color: Colors.deepOrange.withOpacity(0.10),
-                          child: const Icon(
-                            Icons.fastfood,
-                            color: Colors.deepOrange,
-                            size: 36,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      elevation: 4,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Image (top 60%)
+          Container(
+            height: 120,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(18),
+              ),
+              color: Colors.grey[200],
+            ),
+            clipBehavior: Clip.antiAlias,
+            child:
+                item.imageUrl.isNotEmpty
+                    ? Image.network(
+                      item.imageUrl,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder:
+                          (context, error, stackTrace) => Center(
+                            child: Icon(
+                              Icons.fastfood,
+                              color: Colors.deepOrange,
+                              size: 36,
+                            ),
                           ),
-                        ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              item.name,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              item.category,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Colors.deepOrange,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              item.description,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: Colors.black54),
-            ),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '₹${item.price.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Colors.deepOrange,
-                    fontWeight: FontWeight.bold,
+                    )
+                    : Center(
+                      child: Icon(
+                        Icons.fastfood,
+                        color: Colors.deepOrange,
+                        size: 36,
+                      ),
+                    ),
+          ),
+          // Content (bottom 40%)
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 17,
+                    ),
                   ),
-                ),
-                item.available
-                    ? ElevatedButton.icon(
-                      onPressed: () {
-                        Provider.of<CartProvider>(
-                          context,
-                          listen: false,
-                        ).addToCart(item);
-                        Flushbar(
-                          message: '${item.name} added to cart!',
-                          duration: const Duration(seconds: 2),
-                          margin: const EdgeInsets.all(16),
-                          borderRadius: BorderRadius.circular(12),
-                          backgroundColor: Colors.deepOrange,
-                          flushbarPosition: FlushbarPosition.TOP,
-                          icon: const Icon(
-                            Icons.check_circle,
-                            color: Colors.white,
-                          ),
-                        ).show(context);
-                      },
-                      icon: const Icon(Icons.add, size: 16),
-                      label: const Text('Add'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepOrange,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        textStyle: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Icon(Icons.star, color: Colors.green[700], size: 16),
+                      const SizedBox(width: 3),
+                      Text(
+                        '4.4', // Placeholder rating
+                        style: TextStyle(
+                          color: Colors.green[800],
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
                         ),
                       ),
-                    )
-                    : const Text(
-                      'Out of stock',
-                      style: TextStyle(color: Colors.red),
+                      const SizedBox(width: 8),
+                      Text(
+                        '45-50 mins', // Placeholder time
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w500,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    item.category +
+                        (item.description.isNotEmpty
+                            ? ', ${item.description}'
+                            : ''),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[700],
+                      fontWeight: FontWeight.w500,
                     ),
-              ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'VIP Road', // Placeholder location
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '₹${item.price.toStringAsFixed(2)}',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: Colors.deepOrange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      item.available
+                          ? ElevatedButton.icon(
+                            onPressed: () {
+                              Provider.of<CartProvider>(
+                                context,
+                                listen: false,
+                              ).addToCart(item);
+                              Flushbar(
+                                message: '${item.name} added to cart!',
+                                duration: const Duration(seconds: 2),
+                                margin: const EdgeInsets.all(16),
+                                borderRadius: BorderRadius.circular(12),
+                                backgroundColor: Colors.deepOrange,
+                                flushbarPosition: FlushbarPosition.TOP,
+                                icon: const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.white,
+                                ),
+                              ).show(context);
+                            },
+                            icon: const Icon(Icons.add, size: 16),
+                            label: const Text('Add'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepOrange,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              textStyle: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          )
+                          : const Text(
+                            'Out of stock',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
